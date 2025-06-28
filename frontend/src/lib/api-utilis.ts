@@ -6,7 +6,7 @@ type BackendRequestOptions = {
     path: string;
     method?: string;
     requiresAuth?: boolean;
-    body?: any;
+    body?: Record<string, unknown>;
     additionalHeaders?: Record<string, string>;
   };
 

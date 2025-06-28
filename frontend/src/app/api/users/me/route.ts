@@ -1,5 +1,5 @@
 import { backendRequest } from "@/lib/api-utilis";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   const response = await backendRequest(request, {
