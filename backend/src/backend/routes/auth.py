@@ -19,8 +19,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-
-
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -28,8 +26,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
-
-
 
 
 
