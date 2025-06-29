@@ -5,9 +5,9 @@ from backend.routes.auth import router as auth_router
 
 app = FastAPI()
 
-@app.on_event("startup")
-async def startup_event():
-    init_db()
+# @app.on_event("startup")
+# async def startup_event():
+#     init_db()
 
 @app.get("/")
 def health_check():
