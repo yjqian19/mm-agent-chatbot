@@ -1,21 +1,25 @@
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database import Base
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(index=True)
-    email: Mapped[str] = mapped_column(unique=True, index=True)
-    hashed_password: Mapped[str] = mapped_column(nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column(String,nullable=False)
     files: Mapped[list["File"]] = relationship(back_populates="user")
 
 class File(Base):
     __tablename__ = "files"
 
-    id: Mapped[str] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(index=True)
-    path: Mapped[str] = mapped_column(nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String,index=True, nullable=False)
+    content_type: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    size: Mapped[int] = mapped_column(Integer,index=True, nullable=False)
     user: Mapped["User"] = relationship(back_populates="files")
