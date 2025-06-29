@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from backend.models import User
-from backend.routes.auth import get_current_user
+from backend.routers.auth import get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
