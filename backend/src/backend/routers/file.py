@@ -75,7 +75,9 @@ async def download_file(
         file_path = os.path.join(UPLOAD_DIR, str(file.id))
         if not os.path.exists(file_path):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-        return FileResponse(file_path)
+        return FileResponse(
+            path=file_path, media_type=file.content_type, filename=file.name
+        )
     except SQLAlchemyError as e:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error retrieving file: {e}")
