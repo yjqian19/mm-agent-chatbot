@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from backend.database import init_db
 from backend.routers.users import router as users_router
 from backend.routers.auth import router as auth_router
 from backend.routers.file import router as file_router
