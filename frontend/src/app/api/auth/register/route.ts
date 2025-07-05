@@ -1,4 +1,4 @@
-import { backendRequest } from "@/lib/api-utilis";
+import { backendRequest } from "@/lib/api-utils";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {

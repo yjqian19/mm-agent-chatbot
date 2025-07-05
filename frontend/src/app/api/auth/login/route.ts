@@ -1,4 +1,4 @@
-import { BACKEND_URL } from "@/lib/api-utilis";
+import { BACKEND_URL } from "@/lib/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -24,18 +24,18 @@ export async function POST(request: NextRequest) {
     }
 
     const cookieResponse = NextResponse.json(
-        {success: true},
-        { status: 200 }
+      { success: true },
+      { status: 200 },
     );
 
     cookieResponse.cookies.set({
-        name:"auth_token",
-        value: data.access_token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 1800,
-        path: "/",
+      name: "auth_token",
+      value: data.access_token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 1800,
+      path: "/",
     });
 
     return cookieResponse;
@@ -43,5 +43,4 @@ export async function POST(request: NextRequest) {
     console.error(error);
     return NextResponse.json({ error: "Failed to login" }, { status: 500 });
   }
-
 }
