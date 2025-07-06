@@ -1,3 +1,5 @@
+import asyncio
+import uuid
 from fastapi import (
     APIRouter,
     WebSocket,
@@ -12,8 +14,12 @@ from backend.database import db_dependency
 import jwt
 from backend.routers.auth import SECRET_KEY, ALGORITHM, TokenData, InvalidTokenError
 from backend.routers.auth import get_user
+from openai import AsyncOpenAI
+import os
 
 router = APIRouter(prefix="/ws", tags=["ws"])
+
+openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class ConnectionManager:
     def __init__(self):
@@ -31,12 +37,16 @@ class ConnectionManager:
     async def send_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
+    async def send_json(self, data: dict, websocket: WebSocket):
+        await websocket.send_json(data)
+
 manager = ConnectionManager()
 
 async def ws_get_current_user(websocket: WebSocket, db: db_dependency):
     auth_token = websocket.cookies.get("auth_token")
     if not auth_token:
         await manager.disconnect(websocket, status.WS_1008_POLICY_VIOLATION)
+        return None
     try:
         payload = jwt.decode(auth_token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -63,6 +73,32 @@ async def websocket_endpoint(websocket:WebSocket, current_user: Annotated[User, 
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_message(f"Message received from {current_user.name}: {data}", websocket)
+            stream = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": data}],
+                stream=True,
+            )
+
+            message_id = str(uuid.uuid4())
+            await manager.send_json({
+                    "message_id": message_id,
+                    "type": "start"
+                }, websocket)
+
+            async for chunk in stream:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    await manager.send_json({
+                        "message_id": message_id,
+                        "type": "chunk",
+                        "content": content,
+                    }, websocket)
+                    await asyncio.sleep(0.05)
+
+            await manager.send_json({
+                    "message_id": message_id,
+                    "type": "end"
+                }, websocket)
+
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
