@@ -8,6 +8,7 @@ from backend.models import User, File
 from backend.database import db_dependency
 import os
 from sqlalchemy.exc import SQLAlchemyError
+from backend.document_parser import parse_pdf
 
 UPLOAD_DIR = "files"
 
@@ -107,3 +108,30 @@ async def delete_file(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error deleting file from records: {e}")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error deleting file: {e}")
+
+@router.post("/{file_id}/parse")
+async def parse_file(
+    file_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user_from_cookie)],
+    db: db_dependency,
+):
+    file = db.query(File).filter(File.id == file_id).first()
+
+    # Check if file exists and is owned by the user
+    if not file:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+    if file.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this file")
+
+    # Check if file exists in the upload directory
+    file_path = os.path.join(UPLOAD_DIR, str(file.id))
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+
+    # Read the file
+    with open(file_path, "rb") as f:
+        pdf_bytes = f.read()
+
+    # Parse the file
+    parsed_document = await parse_pdf(pdf_bytes)
+    return parsed_document
