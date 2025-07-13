@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Integer
+from sqlalchemy import String, ForeignKey, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database import Base
 from sqlalchemy.dialects.postgresql import UUID
@@ -22,4 +22,5 @@ class File(Base):
     name: Mapped[str] = mapped_column(String,nullable=False)
     content_type: Mapped[str] = mapped_column(String, nullable=False)
     size: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_indexed: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
     user: Mapped["User"] = relationship(back_populates="files")
