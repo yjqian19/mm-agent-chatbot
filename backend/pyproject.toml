@@ -18,6 +18,7 @@ dependencies = [
     "openai (>=1.93.0,<2.0.0)",
     "pymupdf (>=1.26.3,<2.0.0)",
     "chromadb (>=1.0.15,<2.0.0)",
+    "openai-agents (>=0.2.2,<0.3.0)",
 ]
 
 [tool.poetry]
