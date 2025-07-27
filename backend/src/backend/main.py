@@ -3,6 +3,7 @@ from backend.routers.users import router as users_router
 from backend.routers.auth import router as auth_router
 from backend.routers.file import router as file_router
 from backend.routers.chat import router as chat_router
+from backend.routers.ws import router as ws_router
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
@@ -20,11 +21,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def health_check():
     return {"message": "OK"}
+
 
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(file_router)
 app.include_router(chat_router)
+app.include_router(ws_router)
