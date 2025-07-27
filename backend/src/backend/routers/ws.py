@@ -170,14 +170,17 @@ async def websocket_endpoint(
                 input_items.append(user_message)
                 await save_message(session_id, user_message, db)
 
+                logger.info(f"input_items: {input_items}")
+
                 result = Runner.run_streamed(agent, input=input_items)
+                new_input_items = []
                 async for event in result.stream_events():
                     if event.type == "run_item_stream_event":
-                        input_items.append(event.item.to_input_item())
-                        chat_message = await save_message(
-                            session_id, event.item.to_input_item(), db
-                        )
+                        item = event.item.to_input_item()
+                        new_input_items.append(item)
+                        chat_message = await save_message(session_id, item, db)
                         await manager.send_message(chat_message, websocket)
+                input_items += new_input_items
 
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
