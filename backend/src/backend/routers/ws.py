@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import uuid
 from agents import Agent, ModelSettings, Runner, function_tool
@@ -105,7 +106,12 @@ async def get_context_from_files(query: str, user_id: str) -> str:
         user_id (str): The user's ID
 
     Returns:
-        str: The context
+        str: The context fetched from the vector DB. It's a JSON string of a
+        list of dictionaries, each containing the following keys:
+        - file_name: The name of the file
+        - page_number: The page number
+        - content: The content of the page
+        - page_image: The base64 encoded image of the page
     """
     try:
         # Search vector DB for relevant context
@@ -118,16 +124,23 @@ async def get_context_from_files(query: str, user_id: str) -> str:
         context_parts = []
         for i, result in enumerate(search_results):
             metadata = result["metadata"]
-            file_name = metadata.get("file_name", "Unknown")
+            file_id = metadata.get("file_id")
+            file_name = metadata.get("file_name")
+            page_number = metadata.get("page_number")
+
             context_parts.append(
-                f"Document: {file_name}\n" f"Content: {result['content']}\n"
+                {
+                    "file_id": file_id,
+                    "file_name": file_name,
+                    "page_number": page_number,
+                    "content": result["content"],
+                }
             )
 
-        context = "\n---\n".join(context_parts)
-        return context
+        return json.dumps(context_parts)
     except Exception as e:
         logger.error(f"Error retrieving context: {str(e)}")
-        return ""
+        return "[]"
 
 
 @router.websocket("/chat/{session_id}")
@@ -170,8 +183,6 @@ async def websocket_endpoint(
                 input_items.append(user_message)
                 await save_message(session_id, user_message, db)
 
-                logger.info(f"input_items: {input_items}")
-
                 result = Runner.run_streamed(agent, input=input_items)
                 new_input_items = []
                 async for event in result.stream_events():
@@ -180,6 +191,7 @@ async def websocket_endpoint(
                         new_input_items.append(item)
                         chat_message = await save_message(session_id, item, db)
                         await manager.send_message(chat_message, websocket)
+
                 input_items += new_input_items
 
     except WebSocketDisconnect:
