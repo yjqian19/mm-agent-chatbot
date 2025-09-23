@@ -16,11 +16,11 @@ The application implements a Retrieval-Augmented Generation (RAG) pipeline that 
 
 ### Key Highlights
 
-**1. Multi-modal Data Extraction**
+**1. Multi-modal Data Extraction**  
 Built a document parser to extract **text**, **image**, **table** data and create chunks with semantic descriptions via GPT-4.1-mini with custom Pydantic schemas. Optimized performance through **concurrent asynchronous processing** and **batched** database inserts.
 
-**2. Retrieval (Chunking & Embedding)**
+**2. Retrieval (Chunking & Embedding)**  
 Improved retrieval accuracy and reduced query latency by replacing page-level chunking with block-level chunking and content-based embeddings with **summary-based embeddings**, increasing top-3 hit rate and reducing token usage.
 
-**3. Contextual Conversation**
+**3. Contextual Conversation**  
 Integrated chat session history as context for AI agents, enabling continuous conversation flow and maintaining context across multiple queries for more coherent and personalized responses.
