@@ -36,7 +36,7 @@ async def add_file_to_chromadb(file: File, file_path: str):
     if file.content_type == "application/pdf":
         parsed = await parse_pdf(
             file_content
-        )  # HOMEWORK: Try and compare page-level chunks vs. block-level chunks
+        )  # TODO: Try and compare page-level chunks vs. block-level chunks
     else:
         # For non-PDF files, we can add support later
         return
@@ -108,7 +108,7 @@ async def search_vector_db(
     chroma_client = await get_chromadb_client()
     collection = chroma_client.get_or_create_collection(FILE_COLLECTION_NAME)
 
-    # HOMEWORK: Try query enrichment techniques
+    # TODO: Try query enrichment techniques
 
     # Get embedding for the query
     embedding_response = await openai_client.embeddings.create(
